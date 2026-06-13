@@ -1,0 +1,16 @@
+[0.876s] Invoking command in '/home/ronak/ouster_perception_ws/src/segmentation_inference': PYTHONPATH=/home/ronak/ouster_perception_ws/build/segmentation_inference/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ronak/ouster_perception_ws/install/segmentation_inference/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/segmentation_inference build --build-base /home/ronak/ouster_perception_ws/build/segmentation_inference/build install --record /home/ronak/ouster_perception_ws/build/segmentation_inference/install.log --single-version-externally-managed install_data
+[1.176s] running egg_info
+[1.181s] writing manifest file '../../build/segmentation_inference/segmentation_inference.egg-info/SOURCES.txt'
+[1.181s] running build
+[1.181s] running build_py
+[1.181s] running install
+[1.184s] running install_lib
+[1.185s] running install_data
+[1.185s] creating /home/ronak/ouster_perception_ws/install/segmentation_inference/share/segmentation_inference/config
+[1.185s] creating /home/ronak/ouster_perception_ws/install/segmentation_inference/share/segmentation_inference/launch
+[1.185s] running install_egg_info
+[1.187s] removing '/home/ronak/ouster_perception_ws/install/segmentation_inference/lib/python3.10/site-packages/segmentation_inference-0.0.0-py3.10.egg-info' (and everything under it)
+[1.187s] Copying ../../build/segmentation_inference/segmentation_inference.egg-info to /home/ronak/ouster_perception_ws/install/segmentation_inference/lib/python3.10/site-packages/segmentation_inference-0.0.0-py3.10.egg-info
+[1.188s] running install_scripts
+[1.208s] writing list of installed files to '/home/ronak/ouster_perception_ws/build/segmentation_inference/install.log'
+[1.243s] Invoked command in '/home/ronak/ouster_perception_ws/src/segmentation_inference' returned '0': PYTHONPATH=/home/ronak/ouster_perception_ws/build/segmentation_inference/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ronak/ouster_perception_ws/install/segmentation_inference/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/segmentation_inference build --build-base /home/ronak/ouster_perception_ws/build/segmentation_inference/build install --record /home/ronak/ouster_perception_ws/build/segmentation_inference/install.log --single-version-externally-managed install_data

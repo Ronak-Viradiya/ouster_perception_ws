@@ -1,0 +1,14 @@
+running egg_info
+writing manifest file '../../build/segmentation_inference/segmentation_inference.egg-info/SOURCES.txt'
+running build
+running build_py
+running install
+running install_lib
+running install_data
+creating /home/ronak/ouster_perception_ws/install/segmentation_inference/share/segmentation_inference/config
+creating /home/ronak/ouster_perception_ws/install/segmentation_inference/share/segmentation_inference/launch
+running install_egg_info
+removing '/home/ronak/ouster_perception_ws/install/segmentation_inference/lib/python3.10/site-packages/segmentation_inference-0.0.0-py3.10.egg-info' (and everything under it)
+Copying ../../build/segmentation_inference/segmentation_inference.egg-info to /home/ronak/ouster_perception_ws/install/segmentation_inference/lib/python3.10/site-packages/segmentation_inference-0.0.0-py3.10.egg-info
+running install_scripts
+writing list of installed files to '/home/ronak/ouster_perception_ws/build/segmentation_inference/install.log'
