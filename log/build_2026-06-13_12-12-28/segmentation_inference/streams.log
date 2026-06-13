@@ -1,0 +1,27 @@
+[0.963s] Invoking command in '/home/ronak/ouster_perception_ws/src/segmentation_inference': PYTHONPATH=/home/ronak/ouster_perception_ws/build/segmentation_inference/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ronak/ouster_perception_ws/install/segmentation_inference/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/segmentation_inference build --build-base /home/ronak/ouster_perception_ws/build/segmentation_inference/build install --record /home/ronak/ouster_perception_ws/build/segmentation_inference/install.log --single-version-externally-managed install_data
+[1.198s] running egg_info
+[1.199s] creating ../../build/segmentation_inference/segmentation_inference.egg-info
+[1.199s] writing manifest file '../../build/segmentation_inference/segmentation_inference.egg-info/SOURCES.txt'
+[1.203s] writing manifest file '../../build/segmentation_inference/segmentation_inference.egg-info/SOURCES.txt'
+[1.203s] running build
+[1.203s] running build_py
+[1.203s] creating /home/ronak/ouster_perception_ws/build/segmentation_inference/build
+[1.203s] creating /home/ronak/ouster_perception_ws/build/segmentation_inference/build/lib
+[1.203s] creating /home/ronak/ouster_perception_ws/build/segmentation_inference/build/lib/segmentation_inference
+[1.203s] copying segmentation_inference/__init__.py -> /home/ronak/ouster_perception_ws/build/segmentation_inference/build/lib/segmentation_inference
+[1.203s] running install
+[1.206s] running install_lib
+[1.206s] creating /home/ronak/ouster_perception_ws/install/segmentation_inference/lib/python3.10/site-packages/segmentation_inference
+[1.207s] copying /home/ronak/ouster_perception_ws/build/segmentation_inference/build/lib/segmentation_inference/__init__.py -> /home/ronak/ouster_perception_ws/install/segmentation_inference/lib/python3.10/site-packages/segmentation_inference
+[1.207s] byte-compiling /home/ronak/ouster_perception_ws/install/segmentation_inference/lib/python3.10/site-packages/segmentation_inference/__init__.py to __init__.cpython-310.pyc
+[1.207s] running install_data
+[1.207s] creating /home/ronak/ouster_perception_ws/install/segmentation_inference/share/ament_index
+[1.208s] creating /home/ronak/ouster_perception_ws/install/segmentation_inference/share/ament_index/resource_index
+[1.208s] creating /home/ronak/ouster_perception_ws/install/segmentation_inference/share/ament_index/resource_index/packages
+[1.208s] copying resource/segmentation_inference -> /home/ronak/ouster_perception_ws/install/segmentation_inference/share/ament_index/resource_index/packages
+[1.208s] copying package.xml -> /home/ronak/ouster_perception_ws/install/segmentation_inference/share/segmentation_inference
+[1.208s] running install_egg_info
+[1.210s] Copying ../../build/segmentation_inference/segmentation_inference.egg-info to /home/ronak/ouster_perception_ws/install/segmentation_inference/lib/python3.10/site-packages/segmentation_inference-0.0.0-py3.10.egg-info
+[1.211s] running install_scripts
+[1.227s] writing list of installed files to '/home/ronak/ouster_perception_ws/build/segmentation_inference/install.log'
+[1.271s] Invoked command in '/home/ronak/ouster_perception_ws/src/segmentation_inference' returned '0': PYTHONPATH=/home/ronak/ouster_perception_ws/build/segmentation_inference/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ronak/ouster_perception_ws/install/segmentation_inference/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/segmentation_inference build --build-base /home/ronak/ouster_perception_ws/build/segmentation_inference/build install --record /home/ronak/ouster_perception_ws/build/segmentation_inference/install.log --single-version-externally-managed install_data

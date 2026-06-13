@@ -1,0 +1,144 @@
+# Created from templates: Python, JupyterNotebooks, ROS
+# https://www.toptal.com/developers/gitignore
+
+### JupyterNotebooks ###
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# IPython
+profile_default/
+ipython_config.py
+
+### Python ###
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder / Rope
+.spyderproject
+.spyproject
+.ropeproject
+
+# mkdocs
+/site
+
+# mypy / pyre / pytype
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+cython_debug/
+
+### ROS ###
+devel/
+logs/
+bin/
+msg_gen/
+srv_gen/
+msg/*Action.msg
+msg/*ActionFeedback.msg
+msg/*ActionGoal.msg
+msg/*ActionResult.msg
+msg/*Feedback.msg
+msg/*Goal.msg
+msg/*Result.msg
+msg/_*.py
+build_isolated/
+devel_isolated/
+
+# Dynamic reconfigure
+*.cfgc
+/cfg/cpp/
+/cfg/*.py
+
+# Generated docs
+*.dox
+*.wikidoc
+
+# IDE / editor
+.project
+.cproject
+CMakeLists.txt.user
+qtcreator-*
+*.user
+
+# Point cloud data (also added by ROS template)
+*.pcd
+*.bag          # rosbag files
+*.ply          # mesh / point cloud
+
+# Catkin custom
+CATKIN_IGNORE
+
+# Backup files
+*~
+.\#*
+
+#!!! IMPORTANT – DO NOT IGNORE PYTORCH MODEL CHECKPOINTS GLOBALLY !!!
+# Pretrained models are stored in models/pretrained/ and tracked with Git LFS
+# *.pth   <-- removed so Git LFS works
+
+# Custom project ignores
+outputs/
+checkpoints/
+data/sequences/          # raw recorded data – never commit.vscode/

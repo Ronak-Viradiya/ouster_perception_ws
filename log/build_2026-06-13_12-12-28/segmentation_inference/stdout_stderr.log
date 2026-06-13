@@ -1,0 +1,25 @@
+running egg_info
+creating ../../build/segmentation_inference/segmentation_inference.egg-info
+writing manifest file '../../build/segmentation_inference/segmentation_inference.egg-info/SOURCES.txt'
+writing manifest file '../../build/segmentation_inference/segmentation_inference.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/ronak/ouster_perception_ws/build/segmentation_inference/build
+creating /home/ronak/ouster_perception_ws/build/segmentation_inference/build/lib
+creating /home/ronak/ouster_perception_ws/build/segmentation_inference/build/lib/segmentation_inference
+copying segmentation_inference/__init__.py -> /home/ronak/ouster_perception_ws/build/segmentation_inference/build/lib/segmentation_inference
+running install
+running install_lib
+creating /home/ronak/ouster_perception_ws/install/segmentation_inference/lib/python3.10/site-packages/segmentation_inference
+copying /home/ronak/ouster_perception_ws/build/segmentation_inference/build/lib/segmentation_inference/__init__.py -> /home/ronak/ouster_perception_ws/install/segmentation_inference/lib/python3.10/site-packages/segmentation_inference
+byte-compiling /home/ronak/ouster_perception_ws/install/segmentation_inference/lib/python3.10/site-packages/segmentation_inference/__init__.py to __init__.cpython-310.pyc
+running install_data
+creating /home/ronak/ouster_perception_ws/install/segmentation_inference/share/ament_index
+creating /home/ronak/ouster_perception_ws/install/segmentation_inference/share/ament_index/resource_index
+creating /home/ronak/ouster_perception_ws/install/segmentation_inference/share/ament_index/resource_index/packages
+copying resource/segmentation_inference -> /home/ronak/ouster_perception_ws/install/segmentation_inference/share/ament_index/resource_index/packages
+copying package.xml -> /home/ronak/ouster_perception_ws/install/segmentation_inference/share/segmentation_inference
+running install_egg_info
+Copying ../../build/segmentation_inference/segmentation_inference.egg-info to /home/ronak/ouster_perception_ws/install/segmentation_inference/lib/python3.10/site-packages/segmentation_inference-0.0.0-py3.10.egg-info
+running install_scripts
+writing list of installed files to '/home/ronak/ouster_perception_ws/build/segmentation_inference/install.log'
