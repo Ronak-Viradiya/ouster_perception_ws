@@ -144,3 +144,5 @@ checkpoints/
 data/sequences/          # raw recorded data – never commit.vscode/
 .vscode/
 .vscode/
+install/
+log/
