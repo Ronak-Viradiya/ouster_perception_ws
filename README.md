@@ -33,8 +33,7 @@ Git / Collaboration
 git clone git@github.com:Ronak-Viradiya/ouster_perception_ws.git
 ```
 
-Contributing
-- Open an issue or send a pull request. Follow standard GitHub workflows; keep changes focused per package.
+
 
 License
 - See repository `LICENSE` if present; otherwise contact the maintainers for licensing information.
