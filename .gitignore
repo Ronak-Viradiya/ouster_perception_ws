@@ -21,6 +21,9 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+.vscode/
+install/
+log/
 develop-eggs/
 dist/
 downloads/
@@ -143,6 +146,3 @@ outputs/
 checkpoints/
 data/sequences/          # raw recorded data – never commit.vscode/
 .vscode/
-.vscode/
-install/
-log/
