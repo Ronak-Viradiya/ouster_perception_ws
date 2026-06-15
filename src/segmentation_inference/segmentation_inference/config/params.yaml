@@ -33,15 +33,15 @@ model:
     5: "vegetation"
     6: "parking"
 
-  # RGB colour map (0‑255) – used for visualisation in RViz
+  # RGB colour map 
   color_map:
-    0: [0,   0,   0  ]   # unlabeled – black
-    1: [255, 0,   0  ]   # car – red
-    2: [0,   255, 255]   # person – cyan
-    3: [128, 0,   128]   # road – purple
-    4: [70,  70,  70 ]   # building – dark grey
-    5: [0,   255, 0  ]   # vegetation – green
-    6: [255, 255, 0  ]   # parking – yellow
+    0: [0,   0,   0  ]   
+    1: [255, 0,   0  ]
+    2: [0,   255, 255]   
+    3: [128, 0,   128]   
+    4: [70,  70,  70 ]   
+    5: [0,   255, 0  ]   
+    6: [255, 255, 0  ]   
   
   # Paths to pretrained checkpoints (optional, used by some scripts)
   checkpoints:
@@ -52,17 +52,16 @@ model:
 # 4. LABEL MAPPING  (raw dataset ID → training class index)
 # ---------------------------------------------------------------------------
 label_map:
-  # SemanticTHAB raw labels (may vary for your dataset)
   0:   0    # unlabeled
-  1:   0    # outlier           → unlabeled
+  1:   0    # outlier           
 
-  10:  1    # car               → car
-  30:  2    # person            → person
-  254: 2    # moving_person     → person (merged)
-  40:  3    # road              → road
-  50:  4    # building          → building
-  70:  5    # vegetation        → vegetation
-  48:  6    # parking           → parking
+  10:  1    # car   
+  30:  2    # person   
+  254: 2    # moving_person     
+  40:  3    # road   
+  50:  4    # building        
+  70:  5    # vegetation        
+  48:  6    # parking        
 
 inference:
   device: "cuda"
@@ -71,16 +70,16 @@ inference:
 
 # ROS topics
 topics:
-  input_pointcloud: "/ouster/points"            # Input topic from Ouster
-  output_colored: "/rangenet/colored_cloud"     # Output with colors
-  output_labels: "/rangenet/labels"             # Output labels only
-  output_range_image: "/rangenet/range_image"   # Range image output
+  input_pointcloud: "/ouster/points"            
+  output_colored: "/rangenet/colored_cloud"     
+  output_labels: "/rangenet/labels"             
+  output_range_image: "/rangenet/range_image"   
 
 paths:
-  model_weights: "models/trained/salsanext_sequence_00/salsanext_best.pth"  # FIX BUG-8
+  model_weights: "models/trained/salsanext_sequence_00/salsanext_best.pth"  
   class_names: "data/semantic/class_names.txt"
   predictions_dir: "results/predictions/"
   sequences_dir: "data/sequences/"
 
 data:
-  label_base_dir: "/home/ronak/3D/ouster_os0/ouster_os0/src/data/sequences/"   # ← CHANGE THIS TO YOUR ACTUAL SEMANTICTHAB ROOT
+  label_base_dir: "/home/ronak/3D/ouster_os0/ouster_os0/src/data/sequences/"   
