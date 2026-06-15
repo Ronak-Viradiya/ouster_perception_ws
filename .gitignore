@@ -22,8 +22,7 @@ __pycache__/
 .Python
 build/
 .vscode/
-install/
-log/
+
 develop-eggs/
 dist/
 downloads/
