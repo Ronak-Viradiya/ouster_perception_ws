@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'pointcloud_publisher'
+package_name = 'lidar_utils'
 
 setup(
     name=package_name,

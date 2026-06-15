@@ -19,7 +19,7 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='ronak',
+    maintainer='Ronak_Viradiya',
     maintainer_email='ronak.viradiya84@gmail.com',
     description='TODO: Package description',
     license='TODO: License declaration',
