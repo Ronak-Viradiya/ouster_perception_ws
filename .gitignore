@@ -146,3 +146,8 @@ outputs/
 checkpoints/
 data/sequences/          # raw recorded data – never commit.vscode/
 .vscode/
+data/sequences/*/ouster/*.bin
+data/sequences/*/labels/*.label
+data/preprocessed/
+*.pth
+
