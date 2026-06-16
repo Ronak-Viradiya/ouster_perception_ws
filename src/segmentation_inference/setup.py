@@ -32,6 +32,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'inference_node = segmentation_inference.inference_node:main',
+            'rangenetpp_inference_node = segmentation_inference.rangenetpp_inference_node:main',
         ],
     },
 )
