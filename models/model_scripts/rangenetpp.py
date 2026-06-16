@@ -87,7 +87,6 @@ class DecoderBlock(nn.Module):
         self.skip_bn   = nn.BatchNorm2d(out_channels)
         self.relu      = nn.LeakyReLU(0.1, inplace=False)
 
-        # after concatenation: in_channels + out_channels
         self.conv = nn.Conv2d(in_channels + out_channels, out_channels, 3, padding=1)
         self.bn   = nn.BatchNorm2d(out_channels)
 
@@ -227,7 +226,7 @@ def create_and_save_model(config_path=None, save_path=None):
     if save_path is None:
         model_dir = os.path.join(package_root, 'models', 'pretrained_models')
         os.makedirs(model_dir, exist_ok=True)
-        save_path = os.path.join(model_dir, 'rangenet_os0.pth')
+        save_path = os.path.join(model_dir, 'RangeNetPlusPlus.pth')
 
     print("🔄 Creating RangeNet++ model…")
     model = RangeNetPlusPlus(config_path=config_path)

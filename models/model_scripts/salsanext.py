@@ -13,10 +13,9 @@ def load_params(path):
     with open(path, 'r') as f:
         return yaml.safe_load(f) or {}
 
-# ============================================================================
-# SALSAnext BUILDING BLOCKS
-# ============================================================================
-
+# ----------------------------------------------------------------------
+# SalsaNext building blocks 
+# ----------------------------------------------------------------------
 class ResidualBlock(nn.Module):
     def __init__(self, in_ch: int, out_ch: int, stride: int = 1, dilation: int = 1):
         super().__init__()
@@ -40,8 +39,6 @@ class ResidualBlock(nn.Module):
         out = self.relu(self.bn1(self.conv1(x)))
         out = self.bn2(self.conv2(out))
         return self.relu(out + identity)
-
-
 class ContextModule(nn.Module):
     def __init__(self, in_ch: int, out_ch: int):
         super().__init__()
@@ -52,8 +49,6 @@ class ContextModule(nn.Module):
 
     def forward(self, x):
         return self.res1(x) + self.res2(x) + self.res3(x) + self.res4(x)
-
-
 class DecoderBlock(nn.Module):
     def __init__(self, in_ch: int, skip_ch: int, out_ch: int):
         super().__init__()
@@ -79,7 +74,6 @@ class DecoderBlock(nn.Module):
         if x.shape[2:] != skip.shape[2:]:
             x = F.interpolate(x, size=skip.shape[2:], mode='bilinear', align_corners=False)
         return self.relu(self.bn(self.conv(torch.cat([x, skip], dim=1))))
-
 class SalsaNext(nn.Module):
     def __init__(self, num_classes: int = 7, input_channels: int = 5,
                  height: int = 128, width: int = 2048,
@@ -90,13 +84,12 @@ class SalsaNext(nn.Module):
         self.height         = height
         self.width          = width
 
-        # Store meta information for later use (inference, visualisation)
         self.class_names = class_names
         if color_map is not None:
             if isinstance(color_map, torch.Tensor):
                 self.register_buffer('color_map', color_map)
             else:
-                self.color_map = color_map  # list of [R,G,B]
+                self.color_map = color_map
         else:
             self.color_map = None
 
@@ -151,13 +144,15 @@ class SalsaNext(nn.Module):
             x = F.interpolate(x, size=(self.height, self.width),
                               mode='bilinear', align_corners=False)
         return x
-
+# ----------------------------------------------------------------------
+# Model creation & saving 
+# ----------------------------------------------------------------------
 def create_and_save_model(config_path=None, save_path=None,
                           num_classes=None, height=None, width=None, input_channels=None):
     """
     Build SalsaNext, run sanity check, and save checkpoint.
-    Reads class_names & color_map from config if provided.
-    Saves into the fixed pretrained_models directory unless overridden.
+    If save_path is not provided, saves to:
+        /home/ronak/ouster_perception_ws/models/models/pretrained_models/Salsanext.pth
     """
     class_names = None
     color_map_raw = None
@@ -202,10 +197,10 @@ def create_and_save_model(config_path=None, save_path=None,
     assert logits.shape == expected, f"Shape {logits.shape} ≠ {expected}"
     print(f"   ✅ logits shape: {logits.shape}")
 
-    FIXED_DIR = "/home/ronak/3D/ouster_os0/ouster_os0/src/models/models/pretrained_models"
     if save_path is None:
+        FIXED_DIR = "/home/ronak/ouster_perception_ws/models/models/pretrained_models"
         os.makedirs(FIXED_DIR, exist_ok=True)
-        save_path = os.path.join(FIXED_DIR, "THAB_salsanext.pth")
+        save_path = os.path.join(FIXED_DIR, "Salsanext.pth")
 
     checkpoint = {
         'model_state_dict': model.state_dict(),
@@ -222,16 +217,16 @@ def create_and_save_model(config_path=None, save_path=None,
         checkpoint['color_map'] = color_map_raw
 
     torch.save(checkpoint, save_path)
-    size_mb = os.path.getsize(save_path) / 1024**2
+    size_mb = os.path.getsize(save_path) / (1024**2)
     print(f"💾 Saved → {save_path}  ({size_mb:.1f} MB)")
     return model
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Create and save SalsaNext model')
     parser.add_argument('--config', type=str, default=None,
-                        help='Path to params.yaml')
+                        help='Path to params.yaml (optional)')
     parser.add_argument('--save_path', type=str, default=None,
-                        help='Custom save path (default: fixed pretrained_models dir)')
+                        help='Custom save path (default: /home/ronak/ouster_perception_ws/models/models/pretrained_models/Salsanext.pth)')
     parser.add_argument('--num_classes', type=int, default=None)
     parser.add_argument('--height', type=int, default=None)
     parser.add_argument('--width', type=int, default=None)
