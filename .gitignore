@@ -150,4 +150,9 @@ data/sequences/*/ouster/*.bin
 data/sequences/*/labels/*.label
 data/preprocessed/
 *.pth
+*.bin
+*.label
+*.pcd
+*.ply
+*.npz
 
