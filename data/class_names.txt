@@ -1,0 +1,7 @@
+"unlabeled"
+    - "car"
+    - "person"
+    - "road"
+    - "building"
+    - "vegetation"
+    - "parking"
