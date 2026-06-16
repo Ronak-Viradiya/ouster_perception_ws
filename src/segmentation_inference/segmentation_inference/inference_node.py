@@ -41,8 +41,8 @@ def create_model(model_name: str, **kwargs) -> nn.Module:
     return MODEL_REGISTRY[model_name](**kwargs)
 
 # ---- Import custom helpers ----
-from lidar_utils.common import load_params, pointcloud2_to_array, array_to_pointcloud2_rgb_packed
-from range_image import point_cloud_to_range_image
+from lidar_utils.common import load_params, pointcloud2_to_array, array_to_pointcloud2_rgb_packed, point_cloud_to_range_image
+#from lidar_utils.range_image import point_cloud_to_range_image
 
 from sensor_msgs.msg import PointCloud2, PointField
 from visualization_msgs.msg import Marker, MarkerArray

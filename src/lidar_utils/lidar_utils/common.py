@@ -255,3 +255,30 @@ def array_to_pointcloud2_rgb_packed(points, colors, stamp, frame_id='map'):
 
     msg.data = packed.tobytes()
     return msg
+
+def point_cloud_to_range_image(points, height=128, width=2048,
+                               fov_up=45.0, fov_down=-45.0, max_range=100.0, min_range=1.0):
+    x, y, z = points[:, 0], points[:, 1], points[:, 2]
+    intensity = points[:, 3] if points.shape[1] >= 4 else np.zeros_like(x)
+
+    r = np.sqrt(x**2 + y**2 + z**2)
+    mask = (r > min_range) & (r < max_range)
+    r, x, y, z, intensity = r[mask], x[mask], y[mask], z[mask], intensity[mask]
+
+    yaw = -np.arctan2(y, x)
+    pitch = np.arcsin(z / r)
+
+    fov_up_rad, fov_down_rad = np.deg2rad(fov_up), np.deg2rad(fov_down)
+    proj_x = 0.5 * (yaw / np.pi + 1.0)
+    proj_y = 1.0 - (pitch - fov_down_rad) / (fov_up_rad - fov_down_rad)
+
+    col = np.floor(proj_x * (width - 1)).astype(np.int32).clip(0, width - 1)
+    row = np.floor(proj_y * (height - 1)).astype(np.int32).clip(0, height - 1)
+
+    range_img = np.zeros((5, height, width), dtype=np.float32)
+    range_img[0, row, col] = r
+    range_img[1, row, col] = x
+    range_img[2, row, col] = y
+    range_img[3, row, col] = z
+    range_img[4, row, col] = intensity
+    return range_img
