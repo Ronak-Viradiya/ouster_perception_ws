@@ -1,9 +1,0 @@
-# config/bag_playback_params.yaml
-bag_playback_node:
-  ros__parameters:
-    bag_file: "/home/ronak/ouster_perception_ws/data/bags/example_bag"   # change this!
-    topic: "/ouster/points"
-    publish_rate: 10.0          # Hz, 0 = as fast as possible
-    loop: false
-    single_shot: true           # set to true if you just want one static cloud
-    frame_id: "ouster"

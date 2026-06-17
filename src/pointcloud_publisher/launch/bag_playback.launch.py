@@ -1,24 +1,126 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, RegisterEventHandler
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from launch.event_handlers import OnProcessStart
 import os
+import yaml
+
+def detect_frame_from_bag(params_path, topic_name):
+    try:
+        from rosbag2_py import SequentialReader, StorageOptions, ConverterOptions
+        from rclpy.serialization import deserialize_message
+        from sensor_msgs.msg import PointCloud2
+    except Exception:
+        return None
+
+    # Read bag_file from params yaml (support two formats)
+    try:
+        with open(params_path, 'r') as f:
+            cfg = yaml.safe_load(f) or {}
+        if 'bag_playback_node' in cfg:
+            params = cfg.get('bag_playback_node', {}).get('ros__parameters', {}) or {}
+        else:
+            params = cfg
+        bag_file = params.get('bag_file', '')
+        topic = params.get('topic', topic_name)
+        if not bag_file:
+            return None
+    except Exception:
+        return None
+
+    try:
+        reader = SequentialReader()
+        storage_options = StorageOptions(uri=bag_file, storage_id='sqlite3')
+        converter_options = ConverterOptions(input_serialization_format='cdr', output_serialization_format='cdr')
+        reader.open(storage_options, converter_options)
+        while reader.has_next():
+            tpc, data, _ = reader.read_next()
+            if tpc != topic:
+                continue
+            msg = deserialize_message(data, PointCloud2)
+            frame = msg.header.frame_id if hasattr(msg, 'header') else None
+            # reopen to reset read pointer for other readers
+            reader.open(storage_options, converter_options)
+            return frame
+    except Exception:
+        return None
 
 def generate_launch_description():
+    # Default path to your single config file
+    default_config = os.path.join(
+        os.getenv('HOME', '/home/ronak'),
+        'ouster_perception_ws/config/config.yaml'
+    )
+    
+    # Path to rviz config
+    rviz_template = os.path.join(
+        os.path.dirname(__file__),
+        'rviz.rviz'
+    )
+
+    # Attempt to detect fixed frame from bag (falls back to rviz template)
+    detected_frame = detect_frame_from_bag(default_config, '/ouster/points')
+    rviz_config = rviz_template
+    if detected_frame:
+        try:
+            # create a temporary rviz config with Fixed Frame replaced
+            with open(rviz_template, 'r') as f:
+                content = f.read()
+            content = content.replace('Fixed Frame: base_link', f'Fixed Frame: {detected_frame}')
+            tmp_path = os.path.join('/tmp', f'rviz_auto_{os.getpid()}.rviz')
+            with open(tmp_path, 'w') as f:
+                f.write(content)
+            rviz_config = tmp_path
+        except Exception:
+            rviz_config = rviz_template
+
+    # Read bag_file from the single config file
+    try:
+        with open(default_config, 'r') as f:
+            cfg = yaml.safe_load(f) or {}
+        if 'bag_playback_node' in cfg:
+            params = cfg.get('bag_playback_node', {}).get('ros__parameters', {}) or {}
+        else:
+            params = cfg
+        bag_file = params.get('bag_file', '')
+    except Exception:
+        bag_file = ''
+
+    bag_cmd = ['ros2', 'bag', 'play']
+    if bag_file:
+        bag_cmd.append(bag_file)
+    bag_cmd.append('-l')
+
+    # Execute ros2 bag play as a process
+    bag_proc = ExecuteProcess(
+        cmd=bag_cmd,
+        output='screen'
+    )
+
+    # Node to start (rviz) after bag process starts
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', rviz_config]
+    )
+
+    # Start rviz only after bag process starts
+    start_rviz_on_bag = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=bag_proc,
+            on_start=[rviz_node]
+        )
+    )
+
     return LaunchDescription([
         DeclareLaunchArgument(
-            'params_file',
-            default_value=os.path.join(
-                os.getenv('OUSTER_WS', '/home/ronak/ouster_perception_ws'),
-                'config', 'bag_playback_params.yaml'
-            ),
-            description='Path to the bag playback parameters file'
+            'config_file',
+            default_value=default_config,
+            description='ouster_perception_ws/config/config.yaml'
         ),
-        Node(
-            package='pointcloud_publisher',
-            executable='bag_playback_node',
-            name='bag_playback_node',
-            output='screen',
-            parameters=[LaunchConfiguration('params_file')]
-        )
+        bag_proc,
+        start_rviz_on_bag,
     ])

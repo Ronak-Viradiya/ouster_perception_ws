@@ -1,0 +1,9 @@
+# Single config file for bag playback and paths
+# Edit this file to change the bag file path and playback options.
+bag_file: "/home/ronak/bags/dj_outdoor"
+topic: "/ouster/points"
+publish_rate: 10.0
+loop: true
+single_shot: false
+# Optional: override frame_id (leave empty to preserve bag frames)
+frame_id: ""
