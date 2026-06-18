@@ -1,4 +1,4 @@
-bag_file: "/home/ronak/bags/dj_outdoor"
+bag_file: "/home/ronak/ouster_perception_ws/rosbags/2026-03-12_outdoor_campus_ouster"
 topic: "/ouster/points"
 publish_rate: 10.0
 loop: true
