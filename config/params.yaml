@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-# 1. SENSOR  (Ouster OS0‑128 – adjust if you use a different LiDAR)
+# 1. SENSOR  (Ouster OS0‑128 )
 # ---------------------------------------------------------------------------
 sensor:
   name: "ouster_os0_128"
@@ -13,7 +13,7 @@ sensor:
   intensity_min: 0.0
 
 # ---------------------------------------------------------------------------
-# 2. MODEL  (architecture, classes, colours)
+# 2. MODEL 
 # ---------------------------------------------------------------------------
 model:
   name: "thab_8class"               
@@ -23,7 +23,7 @@ model:
   height: 128                       
   width: 2048                      
 
-  # Class names (index → human‑readable label)
+  # Class names 
   names:
     0: "unlabeled"
     1: "car"
@@ -43,13 +43,12 @@ model:
     5: [0,   255, 0  ]   
     6: [255, 255, 0  ]   
   
-  # Paths to pretrained checkpoints (optional, used by some scripts)
   checkpoints:
     salsanext:  "models/models/pretrained_models/THAB_salsanext.pth"
     rangenet++: "models/models/pretrained_models/rangenet_os0.pth"
 
 # ---------------------------------------------------------------------------
-# 4. LABEL MAPPING  (raw dataset ID → training class index)
+# 4. LABEL MAPPING 
 # ---------------------------------------------------------------------------
 label_map:
   0:   0    # unlabeled
@@ -80,6 +79,4 @@ paths:
   class_names: "data/semantic/class_names.txt"
   predictions_dir: "results/predictions/"
   sequences_dir: "data/sequences/"
-
-data:
-  label_base_dir: "/home/ronak/3D/ouster_os0/ouster_os0/src/data/sequences/"   
+ 
