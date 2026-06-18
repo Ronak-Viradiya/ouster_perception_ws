@@ -14,7 +14,6 @@ def detect_frame_from_bag(params_path, topic_name):
     except Exception:
         return None
 
-    # Read bag_file from params yaml (support two formats)
     try:
         with open(params_path, 'r') as f:
             cfg = yaml.safe_load(f) or {}
@@ -40,7 +39,6 @@ def detect_frame_from_bag(params_path, topic_name):
                 continue
             msg = deserialize_message(data, PointCloud2)
             frame = msg.header.frame_id if hasattr(msg, 'header') else None
-            # reopen to reset read pointer for other readers
             reader.open(storage_options, converter_options)
             return frame
     except Exception:
@@ -53,18 +51,15 @@ def generate_launch_description():
         'ouster_perception_ws/config/config.yaml'
     )
     
-    # Path to rviz config
     rviz_template = os.path.join(
         os.path.dirname(__file__),
         'rviz.rviz'
     )
 
-    # Attempt to detect fixed frame from bag (falls back to rviz template)
     detected_frame = detect_frame_from_bag(default_config, '/ouster/points')
     rviz_config = rviz_template
     if detected_frame:
         try:
-            # create a temporary rviz config with Fixed Frame replaced
             with open(rviz_template, 'r') as f:
                 content = f.read()
             content = content.replace('Fixed Frame: base_link', f'Fixed Frame: {detected_frame}')
@@ -75,7 +70,6 @@ def generate_launch_description():
         except Exception:
             rviz_config = rviz_template
 
-    # Read bag_file from the single config file
     try:
         with open(default_config, 'r') as f:
             cfg = yaml.safe_load(f) or {}
@@ -92,13 +86,11 @@ def generate_launch_description():
         bag_cmd.append(bag_file)
     bag_cmd.append('-l')
 
-    # Execute ros2 bag play as a process
     bag_proc = ExecuteProcess(
         cmd=bag_cmd,
         output='screen'
     )
 
-    # Node to start (rviz) after bag process starts
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
@@ -107,7 +99,6 @@ def generate_launch_description():
         arguments=['-d', rviz_config]
     )
 
-    # Start rviz only after bag process starts
     start_rviz_on_bag = RegisterEventHandler(
         event_handler=OnProcessStart(
             target_action=bag_proc,
