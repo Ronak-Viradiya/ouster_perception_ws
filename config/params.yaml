@@ -76,7 +76,7 @@ topics:
   output_range_image: "/rangenet/range_image"   
 
 paths:
-  model_weights: "models/trained/salsanext_sequence_00/salsanext_best.pth"  
+  model_weights: "models/trained/rangenetpp_sequence_00/rangenetpp_best.pth"
   class_names: "data/semantic/class_names.txt"
   predictions_dir: "results/predictions/"
   sequences_dir: "data/sequences/"

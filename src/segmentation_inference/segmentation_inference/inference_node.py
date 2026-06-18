@@ -15,6 +15,26 @@ SRC_DIR = Path(__file__).resolve().parent.parent   # src/
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
+WORKSPACE_ROOT = None
+current = Path(__file__).resolve()
+for parent in [current] + list(current.parents):
+    if (parent / 'models' / 'model_scripts').exists() and (parent / 'src').exists():
+        WORKSPACE_ROOT = parent
+        break
+
+if WORKSPACE_ROOT is None:
+    for idx in (4, 5, 6):
+        try:
+            candidate = current.parents[idx]
+            if (candidate / 'models' / 'model_scripts').exists():
+                WORKSPACE_ROOT = candidate
+                break
+        except IndexError:
+            pass
+
+if WORKSPACE_ROOT and str(WORKSPACE_ROOT) not in sys.path:
+    sys.path.insert(0, str(WORKSPACE_ROOT))
+
 MODEL_REGISTRY = {}
 
 def register_model(name):
@@ -26,13 +46,13 @@ def register_model(name):
 try:
     from models.model_scripts.salsanext import SalsaNext
     register_model('salsanext')(SalsaNext)
-except ImportError:
+except ImportError as e:
     pass
 
 try:
     from models.model_scripts.rangenetpp import RangeNetPlusPlus
     register_model('rangenetpp')(RangeNetPlusPlus)
-except ImportError:
+except ImportError as e:
     pass
 
 def create_model(model_name: str, **kwargs) -> nn.Module:
@@ -40,9 +60,7 @@ def create_model(model_name: str, **kwargs) -> nn.Module:
         raise ValueError(f"Unknown model '{model_name}'. Available: {list(MODEL_REGISTRY.keys())}")
     return MODEL_REGISTRY[model_name](**kwargs)
 
-# ---- Import custom helpers ----
 from lidar_utils.common import load_params, pointcloud2_to_array, array_to_pointcloud2_rgb_packed, point_cloud_to_range_image
-#from lidar_utils.range_image import point_cloud_to_range_image
 
 from sensor_msgs.msg import PointCloud2, PointField
 from visualization_msgs.msg import Marker, MarkerArray
@@ -94,20 +112,16 @@ class RangeNetInference(Node):
             self.max_intensity = 65535.0
             self.get_logger().warn(f'Unknown sensor_type "{sensor_type}", using Ouster intensity norm.')
 
-        # ----- Store projection parameters (the function will be called in the callback) -----
         self.proj_h = model_cfg.get('height', 128)
         self.proj_w = model_cfg.get('width', 2048)
         self.get_logger().info(f'Projection: {self.proj_h}×{self.proj_w}, FOV {self.fov_down}° to {self.fov_up}°')
 
-        # ----- Device -----
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.get_logger().info(f'Device: {self.device}')
 
-        # ----- Load model -----
         self.model = None
         self.load_model()
 
-        # ----- ROS setup -----
         qos = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
             durability=QoSDurabilityPolicy.VOLATILE,
@@ -137,13 +151,34 @@ class RangeNetInference(Node):
         """Load trained model from checkpoint, using architecture stored in it."""
         paths_cfg = self.params.get('paths', {})
         model_path = paths_cfg.get('model_weights',
-                                   'models/trained/salsanext_sequence_00/salsanext_best.pth')
+                                   'models/trained/rangenetpp_sequence_00/rangenetpp_best.pth')
         if not os.path.isabs(model_path):
-            model_path = os.path.join(SRC_DIR, model_path)
+            candidates = [SRC_DIR, Path.cwd()]
+            resolved = Path(__file__).resolve()
+            for idx in (3, 6):
+                try:
+                    candidates.append(resolved.parents[idx])
+                except IndexError:
+                    pass
+
+            model_file = None
+            for base in candidates:
+                candidate = base / model_path
+                if candidate.exists():
+                    model_file = candidate
+                    break
+
+            if model_file is None:
+                model_file = SRC_DIR / model_path
+                self.get_logger().warn(
+                    f'Model not found under workspace roots, using {model_file} and letting torch raise if missing.'
+                )
+            model_path = str(model_file)
+
         self.get_logger().info(f'Loading model from {model_path}')
 
         checkpoint = torch.load(model_path, map_location='cpu', weights_only=False)
-        arch = checkpoint.get('architecture', 'salsanext')
+        arch = checkpoint.get('architecture', 'rangenetpp')
         num_classes_ckpt = checkpoint.get('num_classes', self.num_classes)
         input_channels = checkpoint.get('input_channels', 5)
         height = checkpoint.get('height', 128)
@@ -179,12 +214,10 @@ class RangeNetInference(Node):
         try:
             self.frame_count += 1
 
-            # Convert ROS PointCloud2 -> numpy (N, at least 4 columns: x,y,z,intensity)
             points = pointcloud2_to_array(msg)
             if points.shape[0] == 0:
                 return
 
-            # ---- FIX: Call the function directly (it returns shape (5, H, W)) ----
             range_image_full = point_cloud_to_range_image(
                 points,
                 height=self.proj_h,
@@ -194,29 +227,24 @@ class RangeNetInference(Node):
                 max_range=self.max_range,
                 min_range=self.min_range
             )
-            # Unpack channels
             range_img     = range_image_full[0]
             x_img         = range_image_full[1]
             y_img         = range_image_full[2]
             z_img         = range_image_full[3]
             intensity_img = range_image_full[4]
-            # Create a mask of valid pixels (range > min_range)
             mask = range_img > self.min_range
 
-            # Keep metric copies for reconstruction
             x_met = x_img.copy()
             y_met = y_img.copy()
             z_met = z_img.copy()
             i_met = intensity_img.copy()
 
-            # Normalise exactly as during training
             range_norm   = np.clip(range_img / self.max_range, 0.0, 1.0)
             x_norm       = x_img / self.max_range
             y_norm       = y_img / self.max_range
             z_norm       = z_img / self.max_range
             intensity_norm = np.clip(intensity_img / self.max_intensity, 0.0, 1.0)
 
-            # 5‑channel tensor
             tensor = np.stack([range_norm, x_norm, y_norm, z_norm, intensity_norm], axis=0)
             tensor = torch.from_numpy(tensor).float().unsqueeze(0).to(self.device)
 
@@ -229,12 +257,10 @@ class RangeNetInference(Node):
             labels = preds.squeeze(0).cpu().numpy()
             conf_img = conf.squeeze(0).cpu().numpy()
 
-            # Print stats occasionally
             if self.frame_count % 10 == 0:
                 avg_conf = conf_img[mask].mean() if mask.sum() else 0.0
                 self.get_logger().info(f'Frame {self.frame_count}: avg conf {avg_conf:.3f}')
 
-            # Build colored cloud
             valid = mask.reshape(-1)
             if valid.any():
                 x_flat = x_met.reshape(-1)[valid]
@@ -253,7 +279,6 @@ class RangeNetInference(Node):
                 colored_cloud[:, 3] = i_flat
                 colored_cloud[:, 4:7] = colors
 
-                # Publish colored cloud
                 colored_msg = array_to_pointcloud2_rgb_packed(
                     points=colored_cloud[:, :3],
                     colors=colored_cloud[:, 4:7],
@@ -262,7 +287,6 @@ class RangeNetInference(Node):
                 )
                 self.colored_pub.publish(colored_msg)
 
-                # Publish labeled cloud
                 labeled_cloud = np.zeros((len(x_flat), 5), dtype=np.float32)
                 labeled_cloud[:, 0] = x_flat
                 labeled_cloud[:, 1] = y_flat

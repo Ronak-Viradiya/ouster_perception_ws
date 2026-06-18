@@ -12,12 +12,8 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        # Install the whole config directory
-        (os.path.join('share', package_name, 'config'), 
-         glob(os.path.join(package_name, 'config/*.yaml'))),
-        # Install launch files
-        (os.path.join('share', package_name, 'launch'), 
-         glob(os.path.join(package_name, 'launch/*.py'))),
+        (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
+        (os.path.join('share', package_name, 'launch'), glob('launch/*.rviz')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
