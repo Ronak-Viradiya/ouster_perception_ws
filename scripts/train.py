@@ -198,7 +198,7 @@ def compute_class_weights(dataset, num_classes, device, class_names):
             weights[cls] = 1.0
             print(f"⚠️  Class {cls} ({class_names[cls]}) has zero samples!")
 
-    weights[0] = 0.0  # ignore unlabeled
+    weights[0] = 0.0 
 
     semantic = weights[1:]
     if semantic.sum() > 0:

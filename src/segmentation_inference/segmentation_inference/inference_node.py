@@ -295,7 +295,6 @@ class RangeNetInference(Node):
                 labeled_cloud[:, 4] = lbl_flat.astype(np.float32)
                 self.publish_labeled_cloud(labeled_cloud, msg.header.stamp, msg.header.frame_id)
 
-                # Markers occasionally
                 now = time.time()
                 if now - self.last_marker_time >= self.marker_interval:
                     self.publish_markers(colored_cloud, lbl_flat, msg.header.frame_id)

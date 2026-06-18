@@ -5,9 +5,6 @@ import argparse
 import numpy as np
 from pathlib import Path
 
-# ----------------------------------------------------------------------
-# Load YAML
-# ----------------------------------------------------------------------
 try:
     import yaml
 except ImportError:
@@ -18,22 +15,13 @@ def load_yaml(path):
     with open(path, 'r') as f:
         return yaml.safe_load(f)
 
-# ----------------------------------------------------------------------
-# Default paths relative to the project root 
-# ----------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CONFIG = PROJECT_ROOT / 'config' / 'params.yaml'
 DEFAULT_POINTCLOUD_DIR = PROJECT_ROOT / 'data' / 'sequences' 
 
-# ----------------------------------------------------------------------
-# Read point cloud 
-# ----------------------------------------------------------------------
 def read_bin_file(path):
     return np.fromfile(path, dtype=np.float32).reshape(-1, 4)
 
-# ----------------------------------------------------------------------
-# Read label file
-# ----------------------------------------------------------------------
 def read_label_file(path, expected_points=None):
     file_size = os.path.getsize(path)
     if expected_points is not None and file_size == expected_points * 2:
@@ -41,9 +29,6 @@ def read_label_file(path, expected_points=None):
     raw = np.fromfile(path, dtype=np.uint32)
     return (raw & 0xFFFF).astype(np.uint16), 'uint32'
 
-# ----------------------------------------------------------------------
-# Conversion with validation
-# ----------------------------------------------------------------------
 def apply_mapping(raw_labels, mapping, num_classes):
     out = np.zeros_like(raw_labels, dtype=np.uint8)
     for src, dst in mapping.items():
@@ -53,9 +38,6 @@ def apply_mapping(raw_labels, mapping, num_classes):
         out[raw_labels == src] = dst
     return out
 
-# ----------------------------------------------------------------------
-# Diagnostic: show raw IDs present and which are unmapped
-# ----------------------------------------------------------------------
 def diagnose_frame(raw_labels, mapping, frame_num):
     uniq, cnt = np.unique(raw_labels, return_counts=True)
     print(f"\n🔍 Frame {frame_num} – {len(raw_labels)} points")
@@ -67,9 +49,6 @@ def diagnose_frame(raw_labels, mapping, frame_num):
     else:
         print("   ✅ All IDs covered by label_map.")
 
-# ----------------------------------------------------------------------
-# Process one sequence
-# ----------------------------------------------------------------------
 def process_sequence(pointcloud_dir, label_base_dir, sequence, output_dir, mapping, num_classes):
     ouster_dir = pointcloud_dir / sequence / 'ouster'
     if not ouster_dir.is_dir():

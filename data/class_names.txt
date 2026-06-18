@@ -1,7 +1,7 @@
-"unlabeled"
-    - "car"
-    - "person"
-    - "road"
-    - "building"
-    - "vegetation"
-    - "parking"
+unlabeled
+car
+person
+road
+building
+vegetation
+parking

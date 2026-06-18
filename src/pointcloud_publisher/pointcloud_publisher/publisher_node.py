@@ -55,7 +55,7 @@ class BagPlaybackNode(Node):
         self.publish_rate = float(cfg.get('publish_rate', 10.0))
         self.loop = cfg.get('loop', True)
         self.single_shot = cfg.get('single_shot', False)
-        self.frame_id_override = cfg.get('frame_id', '')  # empty = keep original
+        self.frame_id_override = cfg.get('frame_id', '')  
 
         if not self.bag_file:
             raise ValueError('bag_file not specified in config')

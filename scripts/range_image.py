@@ -69,9 +69,6 @@ def point_cloud_to_range_image(points, height=128, width=2048,
     range_img[4, row, col] = intensity
     return range_img
 
-# ----------------------------------------------------------------------
-# Checkpoint resolver
-# ----------------------------------------------------------------------
 def find_checkpoint(arch, cfg):
     ckpt_map = cfg.get('checkpoints', {})
     if arch in ckpt_map:
@@ -100,9 +97,6 @@ def find_checkpoint(arch, cfg):
         "\nPlease set a valid path in config/params.yaml or place the .pth file in one of the above locations."
     )
 
-# ----------------------------------------------------------------------
-# Main
-# ----------------------------------------------------------------------
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', default='config/params.yaml', help='YAML config file')
