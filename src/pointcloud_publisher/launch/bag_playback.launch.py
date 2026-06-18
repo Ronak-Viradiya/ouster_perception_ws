@@ -48,7 +48,7 @@ def generate_launch_description():
     # Default path to your single config file
     default_config = os.path.join(
         os.getenv('HOME', '/home/ronak'),
-        'ouster_perception_ws/config/config.yaml'
+        'ouster_perception_ws/config/bag_record.yaml'
     )
     
     rviz_template = os.path.join(
@@ -110,7 +110,7 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'config_file',
             default_value=default_config,
-            description='ouster_perception_ws/config/config.yaml'
+            description='ouster_perception_ws/config/bag_record.yaml'
         ),
         bag_proc,
         start_rviz_on_bag,

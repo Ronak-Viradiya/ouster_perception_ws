@@ -10,7 +10,7 @@ from launch.substitutions import LaunchConfiguration
 def generate_launch_description():
 
     ws_root = os.path.expanduser('~/ouster_perception_ws')
-    bag_config = os.path.join(ws_root, 'config', 'config.yaml')
+    bag_config = os.path.join(ws_root, 'config', 'bag_record.yaml')
     inference_config = os.path.join(ws_root, 'config', 'params.yaml')
     rviz_config = os.path.join(ws_root, 'src', 'pointcloud_publisher', 'launch', 'rviz.rviz')
     
@@ -19,7 +19,7 @@ def generate_launch_description():
 
     bag_config_arg = DeclareLaunchArgument(
         'bag_config', default_value=bag_config,
-        description='config/config.yaml'
+        description='config/bag_record.yaml'
     )
     inference_config_arg = DeclareLaunchArgument(
         'inference_config', default_value=inference_config,
