@@ -155,5 +155,6 @@ data/preprocessed/
 *.pcd
 *.ply
 *.npz
-bags/*
-!bags/README.md
+
+rosbags/*
+!rosbags/README.md
