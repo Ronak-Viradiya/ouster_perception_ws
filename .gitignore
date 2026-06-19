@@ -156,6 +156,10 @@ data/preprocessed/
 *.pcd
 *.ply
 *.npz
+*.zip
+*.tar.gz
+# Large CVAT exports and point‑cloud data – ignored from version control
+data/cvat_exports/
 
 rosbags/*
 !rosbags/README.md
