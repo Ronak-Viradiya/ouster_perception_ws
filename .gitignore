@@ -156,8 +156,6 @@ data/preprocessed/
 *.pcd
 *.ply
 *.npz
-*.zip
-*.tar.gz
 data/cvat_exports/*.zip
 data/cvat_exports/sequence_00/velodyne_points/data/*.pcd
 
