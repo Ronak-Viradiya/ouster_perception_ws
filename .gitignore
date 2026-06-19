@@ -158,8 +158,8 @@ data/preprocessed/
 *.npz
 *.zip
 *.tar.gz
-# Large CVAT exports and point‑cloud data – ignored from version control
-data/cvat_exports/
+data/cvat_exports/*.zip
+data/cvat_exports/sequence_00/velodyne_points/data/*.pcd
 
 rosbags/*
 !rosbags/README.md
