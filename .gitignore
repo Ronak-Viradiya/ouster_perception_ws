@@ -158,6 +158,7 @@ data/preprocessed/
 *.npz
 data/cvat_exports/*.zip
 data/cvat_exports/sequence_00/velodyne_points/data/*.pcd
+data/cvat_exports/sequence_00.zip
 
 rosbags/*
 !rosbags/README.md
