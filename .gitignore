@@ -152,6 +152,7 @@ data/preprocessed/
 *.pth
 *.bin
 *.label
+*.labels
 *.pcd
 *.ply
 *.npz
