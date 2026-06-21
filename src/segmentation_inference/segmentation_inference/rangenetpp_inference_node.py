@@ -12,8 +12,9 @@ import torch
 import torch.nn as nn
 
 SRC_DIR = Path(__file__).resolve().parent.parent   # src/
-if str(SRC_DIR) not in sys.path:
-    sys.path.insert(0, str(SRC_DIR))
+WORKSPACE_ROOT = SRC_DIR.parent  # workspace root
+if str(WORKSPACE_ROOT) not in sys.path:
+    sys.path.insert(0, str(WORKSPACE_ROOT))
 
 MODEL_REGISTRY = {}
 
@@ -26,23 +27,21 @@ def register_model(name):
 try:
     from models.model_scripts.salsanext import SalsaNext
     register_model('salsanext')(SalsaNext)
-except ImportError:
-    pass
+except Exception as e:
+    print(f"Warning: Could not import SalsaNext: {e}")
 
 try:
     from models.model_scripts.rangenetpp import RangeNetPlusPlus
     register_model('rangenetpp')(RangeNetPlusPlus)
-except ImportError:
-    pass
+except Exception as e:
+    print(f"Warning: Could not import RangeNetPlusPlus: {e}")
 
 def create_model(model_name: str, **kwargs) -> nn.Module:
     if model_name not in MODEL_REGISTRY:
         raise ValueError(f"Unknown model '{model_name}'. Available: {list(MODEL_REGISTRY.keys())}")
     return MODEL_REGISTRY[model_name](**kwargs)
 
-from lidar_utils.common import load_params, pointcloud2_to_array, array_to_pointcloud2_rgb_packed
-from range_image import point_cloud_to_range_image
-
+from lidar_utils.common import load_params, pointcloud2_to_array, array_to_pointcloud2_rgb_packed, point_cloud_to_range_image
 from sensor_msgs.msg import PointCloud2, PointField
 from visualization_msgs.msg import Marker, MarkerArray
 import geometry_msgs.msg

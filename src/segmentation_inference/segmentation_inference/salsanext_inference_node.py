@@ -12,27 +12,9 @@ import torch
 import torch.nn as nn
 
 SRC_DIR = Path(__file__).resolve().parent.parent
-if str(SRC_DIR) not in sys.path:
-    sys.path.insert(0, str(SRC_DIR))
+WORKSPACE_ROOT = SRC_DIR.parent  # workspace root
 
-WORKSPACE_ROOT = None
-current = Path(__file__).resolve()
-for parent in [current] + list(current.parents):
-    if (parent / 'models' / 'model_scripts').exists() and (parent / 'src').exists():
-        WORKSPACE_ROOT = parent
-        break
-
-if WORKSPACE_ROOT is None:
-    for idx in (4, 5, 6):
-        try:
-            candidate = current.parents[idx]
-            if (candidate / 'models' / 'model_scripts').exists():
-                WORKSPACE_ROOT = candidate
-                break
-        except IndexError:
-            pass
-
-if WORKSPACE_ROOT and str(WORKSPACE_ROOT) not in sys.path:
+if str(WORKSPACE_ROOT) not in sys.path:
     sys.path.insert(0, str(WORKSPACE_ROOT))
 
 MODEL_REGISTRY = {}
@@ -46,14 +28,14 @@ def register_model(name):
 try:
     from models.model_scripts.salsanext import SalsaNext
     register_model('salsanext')(SalsaNext)
-except ImportError:
-    pass
+except Exception as e:
+    print(f"Warning: Could not import SalsaNext: {e}")
 
 try:
     from models.model_scripts.rangenetpp import RangeNetPlusPlus
     register_model('rangenetpp')(RangeNetPlusPlus)
-except ImportError:
-    pass
+except Exception as e:
+    print(f"Warning: Could not import RangeNetPlusPlus: {e}")
 
 
 def create_model(model_name: str, **kwargs) -> nn.Module:
