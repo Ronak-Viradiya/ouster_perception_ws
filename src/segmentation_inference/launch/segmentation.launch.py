@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import os
-from datetime import datetime
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess
+from launch.actions import DeclareLaunchArgument
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration
 
@@ -14,9 +13,6 @@ def generate_launch_description():
     inference_config = os.path.join(ws_root, 'config', 'params.yaml')
     rviz_config = os.path.join(ws_root, 'src', 'pointcloud_publisher', 'launch', 'rviz.rviz')
     
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    bag_record_path = os.path.join(ws_root, 'rosbags', f'recorded_session_{timestamp}')
-
     bag_config_arg = DeclareLaunchArgument(
         'bag_config', default_value=bag_config,
         description='config/bag_record.yaml'
@@ -28,10 +24,6 @@ def generate_launch_description():
     rviz_config_arg = DeclareLaunchArgument(
         'rviz_config', default_value=rviz_config,
         description='RViz config file'
-    )
-    bag_record_arg = DeclareLaunchArgument(
-        'bag_record_path', default_value=bag_record_path,
-        description='Output directory for ros2 bag record'
     )
 
     bag_node = Node(
@@ -50,17 +42,6 @@ def generate_launch_description():
         parameters=[{'config_file': LaunchConfiguration('inference_config')}],
     )
 
-    bag_record = ExecuteProcess(
-        cmd=[
-            'ros2', 'bag', 'record',
-            '-o', LaunchConfiguration('bag_record_path'),
-            '/ouster/points',
-            '/rangenet/colored_cloud',
-            '/rangenet/labels',
-        ],
-        output='screen',
-    )
-
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
@@ -73,9 +54,7 @@ def generate_launch_description():
         bag_config_arg,
         inference_config_arg,
         rviz_config_arg,
-        bag_record_arg,
         bag_node,
         inference_node,
-        bag_record,
         rviz_node,
     ])
