@@ -152,27 +152,38 @@ class SalsaNextInference(Node):
             'models/models/pretrained_models/THAB_salsanext.pth'
         )
         if not os.path.isabs(model_path):
-            candidates = [SRC_DIR, Path.cwd()]
-            resolved = Path(__file__).resolve()
-            for idx in (3, 6):
-                try:
-                    candidates.append(resolved.parents[idx])
-                except IndexError:
-                    pass
-
-            model_file = None
-            for base in candidates:
-                candidate = base / model_path
+            # Try to resolve relative to workspace root based on config file location
+            config_file = self.get_parameter('config_file').value
+            if config_file and os.path.exists(config_file):
+                workspace_root = Path(config_file).resolve().parent.parent
+                candidate = workspace_root / model_path
                 if candidate.exists():
-                    model_file = candidate
-                    break
+                    model_path = str(candidate)
+                else:
+                    # Fallback: try common workspace parent paths
+                    candidates = [workspace_root, SRC_DIR, Path.cwd()]
+                    resolved = Path(__file__).resolve()
+                    for idx in (3, 6):
+                        try:
+                            candidates.append(resolved.parents[idx])
+                        except IndexError:
+                            pass
 
-            if model_file is None:
-                model_file = SRC_DIR / model_path
-                self.get_logger().warn(
-                    f'Model not found under workspace roots, using {model_file} and letting torch raise if missing.'
-                )
-            model_path = str(model_file)
+                    model_file = None
+                    for base in candidates:
+                        candidate = base / model_path
+                        if candidate.exists():
+                            model_file = candidate
+                            break
+
+                    if model_file is None:
+                        model_file = workspace_root / model_path
+                        self.get_logger().warn(
+                            f'Model not found under workspace roots, using {model_file} and letting torch raise if missing.'
+                        )
+                    model_path = str(model_file)
+            else:
+                model_path = str(SRC_DIR / model_path)
 
         self.get_logger().info(f'Loading SalsaNext model from {model_path}')
 

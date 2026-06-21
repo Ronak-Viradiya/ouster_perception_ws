@@ -316,29 +316,46 @@ def validate(model, loader, criterion, device, num_classes, class_names):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Train a LiDAR segmentation model (SalsaNext / RangeNet++).')
+        description='Train a LiDAR segmentation model (SalsaNext / RangeNet++).',
+        usage='python3 train.py <model> [options]')
+    
+    # Positional argument: model name
+    parser.add_argument('model', type=str,
+                        help='Model architecture (salsanext or rangenetpp).')
+    
+    # Optional arguments
     parser.add_argument('--config', default='config/params.yaml',
                         help='Path to YAML config file.')
     parser.add_argument('--data_dir', default=None,
                         help='Dataset root containing train/ and val/ folders.')
     parser.add_argument('--sequence', default='00',
                         help='Sequence ID (used if combined/ is missing).')
-    parser.add_argument('--model', type=str, default=None,
-                        choices=list(MODEL_REGISTRY.keys()) if MODEL_REGISTRY else None,
-                        help='Model architecture (overrides config).')
-    parser.add_argument('--epochs', type=int, default=50)
-    
+    parser.add_argument('--epochs', type=int, default=50,
+                        help='Number of epochs.')
     parser.add_argument('--batch_size', type=int, default=2,
                         help='Batch size per GPU. Keep low for small GPUs.')
-    parser.add_argument('--lr', type=float, default=1e-3)
+    parser.add_argument('--lr', type=float, default=1e-3,
+                        help='Learning rate.')
     parser.add_argument('--accum_steps', type=int, default=4,
                         help='Gradient accumulation steps (effective batch = batch_size * accum_steps).')
-    parser.add_argument('--num_workers', type=int, default=2)
-    parser.add_argument('--loss', choices=['ce', 'focal'], default='focal')
-    parser.add_argument('--no_aug', action='store_true')
-    parser.add_argument('--no_norm', action='store_true')
-    parser.add_argument('--patience', type=int, default=15)
+    parser.add_argument('--num_workers', type=int, default=2,
+                        help='Number of data loader workers.')
+    parser.add_argument('--loss', choices=['ce', 'focal'], default='focal',
+                        help='Loss function (cross-entropy or focal).')
+    parser.add_argument('--no_aug', action='store_true',
+                        help='Disable data augmentation.')
+    parser.add_argument('--no_norm', action='store_true',
+                        help='Disable input normalization.')
+    parser.add_argument('--patience', type=int, default=15,
+                        help='Early stopping patience.')
     args = parser.parse_args()
+
+    # Validate model
+    if args.model not in MODEL_REGISTRY:
+        print(f"❌ Model '{args.model}' not found. Available: {list(MODEL_REGISTRY.keys())}")
+        sys.exit(1)
+    architecture = args.model
+
 
     config_path = Path(args.config)
     if not config_path.exists():
@@ -354,11 +371,6 @@ def main():
         class_names = [class_names_dict[i] for i in range(num_classes)]
     else:
         class_names = [f"class_{i}" for i in range(num_classes)]
-
-    architecture = args.model or model_cfg.get('architecture', 'salsanext')
-    if architecture not in MODEL_REGISTRY:
-        print(f"❌ Model '{architecture}' not found in registry. Available: {list(MODEL_REGISTRY.keys())}")
-        sys.exit(1)
 
     input_ch = model_cfg.get('input_channels', 5)
     proj_h = model_cfg.get('height', 128)
@@ -387,7 +399,7 @@ def main():
                 sys.exit(1)
     print(f"✅ Data directory: {data_dir}")
 
-    model_save_dir = Path(f'models/trained/{architecture}_sequence_{args.sequence}')
+    model_save_dir = Path(__file__).resolve().parent.parent / f'models/trained/{architecture}_sequence_{args.sequence}'
     model_save_dir.mkdir(parents=True, exist_ok=True)
 
 
