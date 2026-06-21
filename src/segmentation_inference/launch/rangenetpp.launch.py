@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-Launch RangeNet++ inference with bag playback and RViz.
-Simple command: ros2 launch segmentation_inference rangenetpp.launch.py
-"""
 import os
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
@@ -29,8 +25,6 @@ def generate_launch_description():
         'rviz_config', default_value=rviz_config,
         description='RViz config file'
     )
-
-    # Bag playback node
     bag_node = Node(
         package='pointcloud_publisher',
         executable='publisher_node',           
@@ -38,8 +32,6 @@ def generate_launch_description():
         output='screen',
         parameters=[{'config_file': LaunchConfiguration('bag_config')}],
     )
-
-    # RangeNet++ inference node
     rangenetpp_node = Node(
         package='segmentation_inference',
         executable='rangenetpp_inference_node',           
@@ -47,8 +39,6 @@ def generate_launch_description():
         output='screen',
         parameters=[{'config_file': LaunchConfiguration('inference_config')}],
     )
-
-    # RViz for visualization
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',

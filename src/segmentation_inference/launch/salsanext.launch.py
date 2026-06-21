@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-Launch SalsaNext inference with bag playback and RViz.
-Simple command: ros2 launch segmentation_inference salsanext.launch.py
-"""
 import os
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
@@ -30,7 +26,6 @@ def generate_launch_description():
         description='RViz config file'
     )
 
-    # Bag playback node
     bag_node = Node(
         package='pointcloud_publisher',
         executable='publisher_node',           
@@ -39,7 +34,6 @@ def generate_launch_description():
         parameters=[{'config_file': LaunchConfiguration('bag_config')}],
     )
 
-    # SalsaNext inference node
     salsanext_node = Node(
         package='segmentation_inference',
         executable='salsanext_inference_node',           
@@ -48,7 +42,6 @@ def generate_launch_description():
         parameters=[{'config_file': LaunchConfiguration('inference_config')}],
     )
 
-    # RViz for visualization
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
