@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-CENet: Context Encoding for Semantic Segmentation in 3D LiDAR
-Reference: https://arxiv.org/abs/2105.08332
-"""
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -20,9 +16,6 @@ def load_params(path):
 # Context Encoding Module (CEM)
 # ----------------------------------------------------------------------
 class ContextEncodingModule(nn.Module):
-    """
-    Learnable context vectors to capture global scene context
-    """
     def __init__(self, in_channels, num_codes=32):
         super().__init__()
         self.num_codes = num_codes
@@ -31,13 +24,11 @@ class ContextEncodingModule(nn.Module):
         self.codebook = nn.Parameter(torch.Tensor(num_codes, in_channels))
         self.codebook.data.normal_(0, 0.1)
         
-        # Attention mechanism
         self.attention = nn.Sequential(
             nn.Conv2d(in_channels, num_codes, 1),
             nn.Softmax(dim=1)
         )
         
-        # Projection after aggregation
         self.projection = nn.Sequential(
             nn.Conv2d(in_channels + in_channels, in_channels, 1),
             nn.BatchNorm2d(in_channels),
@@ -47,20 +38,15 @@ class ContextEncodingModule(nn.Module):
     def forward(self, x):
         b, c, h, w = x.shape
         
-        # Reshape to [b, c, h*w]
         x_flat = x.view(b, c, -1)
         
-        # Compute attention weights [b, num_codes, h*w]
         attn_weights = self.attention(x).view(b, self.num_codes, -1)
         attn_weights = F.softmax(attn_weights, dim=1)  # Normalize across codes
         
-        # Weighted combination of codebook vectors
-        # [b, num_codes, h*w] @ [num_codes, c] -> [b, c, h*w]
         context = torch.bmm(attn_weights.transpose(1, 2), 
                            self.codebook.unsqueeze(0).expand(b, -1, -1))
         context = context.transpose(1, 2).view(b, c, h, w)
         
-        # Concatenate with original features
         out = torch.cat([x, context], dim=1)
         out = self.projection(out)
         
@@ -70,21 +56,15 @@ class ContextEncodingModule(nn.Module):
 # Dual Attention Module (DAM)
 # ----------------------------------------------------------------------
 class DualAttentionModule(nn.Module):
-    """
-    Combines spatial attention and channel attention
-    """
     def __init__(self, in_channels, reduction=16):
         super().__init__()
         
-        # Spatial attention
         self.spatial_conv = nn.Conv2d(in_channels, 1, kernel_size=1)
         
-        # Channel attention
         self.channel_avg_pool = nn.AdaptiveAvgPool2d(1)
         self.channel_fc1 = nn.Linear(in_channels, in_channels // reduction)
         self.channel_fc2 = nn.Linear(in_channels // reduction, in_channels)
         
-        # Fusion
         self.fusion = nn.Sequential(
             nn.Conv2d(in_channels * 2, in_channels, 1),
             nn.BatchNorm2d(in_channels),
@@ -92,11 +72,9 @@ class DualAttentionModule(nn.Module):
         )
         
     def forward(self, x):
-        # Spatial attention
         spatial_weights = torch.sigmoid(self.spatial_conv(x))
         spatial_out = x * spatial_weights
         
-        # Channel attention (Squeeze-and-Excitation)
         b, c, h, w = x.shape
         channel_avg = self.channel_avg_pool(x).view(b, c)
         channel_weights = torch.sigmoid(self.channel_fc2(self.channel_fc1(channel_avg)))
@@ -117,7 +95,6 @@ class CENetEncoder(nn.Module):
         super().__init__()
         self.relu = nn.ReLU(inplace=True)
         
-        # Entry flow (like ERFNet)
         self.conv1 = nn.Conv2d(input_channels, 32, 3, stride=2, padding=1)
         self.bn1 = nn.BatchNorm2d(32)
         
@@ -129,7 +106,6 @@ class CENetEncoder(nn.Module):
         self.down2 = self._make_downsample(128, 256)
         self.down3 = self._make_downsample(256, 512)
         
-        # Context Encoding Module at bottleneck
         self.context_module = ContextEncodingModule(512, num_codes=64)
         self.dual_attention = DualAttentionModule(512)
         
@@ -188,12 +164,9 @@ class CENetDecoder(nn.Module):
         super().__init__()
         self.relu = nn.ReLU(inplace=True)
         
-        # Decoder blocks with skip connections
         self.deconv1 = nn.ConvTranspose2d(1024, 512, 3, stride=2, padding=1, output_padding=1)
         self.deconv1_bn = nn.BatchNorm2d(512)
         
-        # FIXED: Match actual skip connection sizes
-        # skip[3] = after down2 -> 256 channels
         self.decoder_conv1 = nn.Sequential(
             nn.Conv2d(512 + 256, 512, 3, padding=1),  # 512 + 256 = 768
             nn.BatchNorm2d(512),
@@ -206,7 +179,6 @@ class CENetDecoder(nn.Module):
         self.deconv2 = nn.ConvTranspose2d(512, 256, 3, stride=2, padding=1, output_padding=1)
         self.deconv2_bn = nn.BatchNorm2d(256)
         
-        # skip[2] = after down1 -> 128 channels
         self.decoder_conv2 = nn.Sequential(
             nn.Conv2d(256 + 128, 256, 3, padding=1),  # 256 + 128 = 384
             nn.BatchNorm2d(256),
@@ -219,7 +191,6 @@ class CENetDecoder(nn.Module):
         self.deconv3 = nn.ConvTranspose2d(256, 128, 3, stride=2, padding=1, output_padding=1)
         self.deconv3_bn = nn.BatchNorm2d(128)
         
-        # skip[1] = after conv2 -> 64 channels
         self.decoder_conv3 = nn.Sequential(
             nn.Conv2d(128 + 64, 128, 3, padding=1),  # 128 + 64 = 192
             nn.BatchNorm2d(128),
@@ -232,7 +203,6 @@ class CENetDecoder(nn.Module):
         self.deconv4 = nn.ConvTranspose2d(128, 64, 3, stride=2, padding=1, output_padding=1)
         self.deconv4_bn = nn.BatchNorm2d(64)
         
-        # skip[0] = after conv1 -> 32 channels
         self.decoder_conv4 = nn.Sequential(
             nn.Conv2d(64 + 32, 64, 3, padding=1),  # 64 + 32 = 96
             nn.BatchNorm2d(64),
@@ -242,7 +212,6 @@ class CENetDecoder(nn.Module):
             nn.ReLU(inplace=True)
         )
         
-        # Final upsampling and classification
         self.final_conv = nn.Sequential(
             nn.Conv2d(64, 64, 3, padding=1),
             nn.BatchNorm2d(64),
@@ -251,12 +220,7 @@ class CENetDecoder(nn.Module):
         )
     
     def forward(self, x, skips):
-        # skips[0] = after conv1 -> 32 channels (H/2)
-        # skips[1] = after conv2 -> 64 channels (H/4)
-        # skips[2] = after down1 -> 128 channels (H/8)
-        # skips[3] = after down2 -> 256 channels (H/16)
         
-        # Decoder stage 1: H/64 -> H/32
         x = self.relu(self.deconv1_bn(self.deconv1(x)))
         skip = skips[3]  # 256 channels
         if x.shape[2:] != skip.shape[2:]:
@@ -264,7 +228,6 @@ class CENetDecoder(nn.Module):
         x = torch.cat([x, skip], dim=1)  # 512 + 256 = 768
         x = self.decoder_conv1(x)
         
-        # Decoder stage 2: H/32 -> H/16
         x = self.relu(self.deconv2_bn(self.deconv2(x)))
         skip = skips[2]  # 128 channels
         if x.shape[2:] != skip.shape[2:]:
@@ -272,7 +235,6 @@ class CENetDecoder(nn.Module):
         x = torch.cat([x, skip], dim=1)  # 256 + 128 = 384
         x = self.decoder_conv2(x)
         
-        # Decoder stage 3: H/16 -> H/8
         x = self.relu(self.deconv3_bn(self.deconv3(x)))
         skip = skips[1]  # 64 channels
         if x.shape[2:] != skip.shape[2:]:
@@ -309,7 +271,6 @@ class CENet(nn.Module):
         self.width = width
         self.input_channels = input_channels
         
-        # Default class names
         self.class_names = [
             'unlabeled', 'car', 'person', 'road',
             'building', 'vegetation', 'parking'
@@ -326,7 +287,6 @@ class CENet(nn.Module):
         ], dtype=torch.uint8)
         self.color_map = DEFAULT_COLOR_MAP
         
-        # Load config
         if config_path is not None and os.path.exists(config_path):
             try:
                 params = load_params(config_path)
@@ -357,11 +317,9 @@ class CENet(nn.Module):
             except Exception as e:
                 print(f"⚠️ Error loading config: {e}, keeping provided parameters")
         
-        # Normalization stats
         self.register_buffer('input_mean', torch.tensor([12.12, 0.0, 0.0, -1.04, 0.21]).view(1, 5, 1, 1))
         self.register_buffer('input_std', torch.tensor([12.32, 11.7, 6.72, 0.86, 0.16]).view(1, 5, 1, 1))
         
-        # Build network
         self.backbone = CENetEncoder(input_channels=self.input_channels)
         self.decoder = CENetDecoder(num_classes=self.num_classes)
         
@@ -378,7 +336,6 @@ class CENet(nn.Module):
         x = self.decoder(x, skips)
         x = self.dropout(x)
         
-        # Upsample to original size
         x = F.interpolate(x, size=(self.height, self.width),
                          mode='bilinear', align_corners=False)
         
@@ -393,16 +350,11 @@ class CENet(nn.Module):
         colored = self.color_map[pred_classes].permute(0, 3, 1, 2).contiguous()
         return pred_classes, probs, colored
 
-# ----------------------------------------------------------------------
-# Utility function to create and save model
-# ----------------------------------------------------------------------
 def create_and_save_model(config_path=None, save_path=None):
     script_dir = Path(__file__).parent.absolute()
     package_root = script_dir.parent
     
-    # Handle config path
     if config_path is None:
-        # Try to find config in standard locations
         possible_paths = [
             os.path.join(package_root, 'config', 'params.yaml'),
             os.path.join(package_root, 'src', 'config', 'params.yaml'),
@@ -434,7 +386,6 @@ def create_and_save_model(config_path=None, save_path=None):
     output = model(test_input)
     print(f"   ✅ Forward pass OK – output shape: {output.shape}")
     
-    # Save model
     torch.save({
         'model_state_dict': model.state_dict(),
         'model_architecture': 'CENet',
