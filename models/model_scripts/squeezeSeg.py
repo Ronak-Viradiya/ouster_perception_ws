@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-SqueezeSeg: Real-time Semantic Segmentation for 3D LiDAR Point Clouds
-Reference: https://arxiv.org/abs/1710.07368
-"""
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -46,12 +42,10 @@ class SqueezeSegBackbone(nn.Module):
         super().__init__()
         self.relu = nn.ReLU(inplace=True)
         
-        # Initial convolution (no downsampling)
         self.conv1 = nn.Conv2d(input_channels, 64, 3, stride=1, padding=1)
         self.bn1 = nn.BatchNorm2d(64)
         self.pool1 = nn.MaxPool2d(2, stride=2)
         
-        # Fire modules with downsampling at specific points
         self.fire2 = FireModule(64, 16, 64, 64)      # 64+64=128
         self.fire3 = FireModule(128, 16, 64, 64)     # 64+64=128
         self.fire4 = FireModule(128, 32, 128, 128)   # 128+128=256
@@ -109,41 +103,27 @@ class SqueezeSegDecoder(nn.Module):
         super().__init__()
         self.relu = nn.ReLU(inplace=True)
         
-        # Decoder layers with upsampling
         self.deconv1 = nn.ConvTranspose2d(512, 512, 3, stride=2, padding=1, output_padding=1)
         self.deconv1_bn = nn.BatchNorm2d(512)
         
-        # Skip 2: from fire8 (512 channels) -> match with deconv output (512 channels)
-        # After concatenation: 512+512=1024 -> Fire10 output 512
         self.fire10 = FireModule(1024, 64, 256, 256)  # 256+256=512
         
         self.deconv2 = nn.ConvTranspose2d(512, 256, 3, stride=2, padding=1, output_padding=1)
         self.deconv2_bn = nn.BatchNorm2d(256)
         
-        # Skip 1: from fire4 (256 channels) -> match with deconv output (256 channels)
-        # After concatenation: 256+256=512 -> Fire11 output 384
         self.fire11 = FireModule(512, 48, 192, 192)  # 192+192=384
         
         self.deconv3 = nn.ConvTranspose2d(384, 128, 3, stride=2, padding=1, output_padding=1)
         self.deconv3_bn = nn.BatchNorm2d(128)
         
-        # Skip 0: from conv1 (64 channels) -> match with deconv output (128 channels)
-        # Need to project skip to 128 channels first
         self.skip_conv0 = nn.Conv2d(64, 128, 1)
         self.skip_bn0 = nn.BatchNorm2d(128)
         
-        # After concatenation: 128+128=256 -> Fire12 output 128
         self.fire12 = FireModule(256, 32, 64, 64)  # 64+64=128
         
-        # Final convolution
         self.final_conv = nn.Conv2d(128, num_classes, 1)
         
     def forward(self, x, skips):
-        # skips[0] = after conv1 (H, W) - 64 channels
-        # skips[1] = after fire4 (H/2, W/2) - 256 channels
-        # skips[2] = after fire8 (H/4, W/4) - 512 channels
-        
-        # Decoder stage 1: H/8 -> H/4
         x = self.relu(self.deconv1_bn(self.deconv1(x)))  # 512 channels
         skip = skips[2]  # 512 channels
         if x.shape[2:] != skip.shape[2:]:
@@ -188,7 +168,6 @@ class SqueezeSeg(nn.Module):
         self.width = width
         self.input_channels = input_channels
         
-        # Default class names (adjust for your dataset)
         self.class_names = [
             'unlabeled', 'car', 'person', 'road',
             'building', 'vegetation', 'parking'
@@ -205,7 +184,6 @@ class SqueezeSeg(nn.Module):
         ], dtype=torch.uint8)
         self.color_map = DEFAULT_COLOR_MAP
         
-        # Load config if provided
         if config_path is not None and os.path.exists(config_path):
             try:
                 params = load_params(config_path)
@@ -236,15 +214,12 @@ class SqueezeSeg(nn.Module):
             except Exception as e:
                 print(f"⚠️ Error loading config: {e}, keeping provided parameters")
         
-        # Normalization stats (typical for range images)
         self.register_buffer('input_mean', torch.tensor([12.12, 0.0, 0.0, -1.04, 0.21]).view(1, 5, 1, 1))
         self.register_buffer('input_std', torch.tensor([12.32, 11.7, 6.72, 0.86, 0.16]).view(1, 5, 1, 1))
         
-        # Build network
         self.backbone = SqueezeSegBackbone(input_channels=self.input_channels)
         self.decoder = SqueezeSegDecoder(num_classes=self.num_classes)
         
-        # Dropout for regularization
         self.dropout = nn.Dropout2d(0.1)
         
         print(f"✅ SqueezeSeg model initialized:")
@@ -258,7 +233,6 @@ class SqueezeSeg(nn.Module):
         x = self.decoder(x, skips)
         x = self.dropout(x)
         
-        # Upsample to original size
         x = F.interpolate(x, size=(self.height, self.width),
                          mode='bilinear', align_corners=False)
         
@@ -277,13 +251,9 @@ class SqueezeSeg(nn.Module):
 # Utility function to find config file
 # ----------------------------------------------------------------------
 def find_config_file(config_path=None):
-    """
-    Find config file by checking multiple possible locations
-    """
     if config_path is not None and os.path.exists(config_path):
         return config_path
     
-    # Possible config locations
     possible_paths = [
         "/home/ronak/ouster_perception_ws/config/params.yaml",
         "/home/ronak/ouster_perception_ws/src/config/params.yaml",
@@ -306,7 +276,6 @@ def create_and_save_model(config_path=None, save_path=None):
     script_dir = Path(__file__).parent.absolute()
     package_root = script_dir.parent
     
-    # Find config file
     config_path = find_config_file(config_path)
     
     if config_path is None:
@@ -323,12 +292,10 @@ def create_and_save_model(config_path=None, save_path=None):
     model = SqueezeSeg(config_path=config_path)
     model.eval()
     
-    # Test forward pass
     test_input = torch.randn(1, model.input_channels, model.height, model.width)
     output = model(test_input)
     print(f"   ✅ Forward pass OK – output shape: {output.shape}")
     
-    # Save model
     torch.save({
         'model_state_dict': model.state_dict(),
         'model_architecture': 'SqueezeSeg',
@@ -353,20 +320,16 @@ def create_and_save_model(config_path=None, save_path=None):
 # Main
 # ----------------------------------------------------------------------
 def main():
-    # Try multiple ways to specify config path
     config_path = None
     
-    # 1. Check environment variable
     if "CONFIG_PATH" in os.environ:
         config_path = os.environ["CONFIG_PATH"]
         print(f"📌 Using CONFIG_PATH from environment: {config_path}")
     
-    # 2. Check if user passed as argument
     if len(sys.argv) > 1:
         config_path = sys.argv[1]
         print(f"📌 Using config from command line: {config_path}")
     
-    # 3. Use default path
     if config_path is None:
         config_path = "/home/ronak/ouster_perception_ws/config/params.yaml"
         print(f"📌 Using default config path: {config_path}")
